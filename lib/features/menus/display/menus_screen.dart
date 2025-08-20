@@ -5,6 +5,7 @@ import 'package:unicons/unicons.dart';
 
 import '../../../core/injector.dart';
 import '../../categories/data/model/category.dart';
+import '../../categories/display/bloc/categories_bloc.dart';
 import '../../categories/domain/usecases/categories_usecase.dart';
 import '../data/model/menu_model.dart';
 import '../domain/usecases/menus_usecase.dart';
@@ -15,9 +16,18 @@ class MenusScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          MenusBloc(usecase: sl<MenusUsecase>())..add(const MenusFetched()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              MenusBloc(usecase: sl<MenusUsecase>())..add(const MenusFetched()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              CategoriesBloc(usecase: sl<CategoriesUsecase>())
+                ..add(const CategoriesFetched()),
+        ),
+      ],
       child: const MenusScreenView(),
     );
   }
@@ -87,6 +97,101 @@ class _MenusScreenViewState extends State<MenusScreenView> {
             ),
           ),
           const SliverGap(8),
+          BlocBuilder<CategoriesBloc, CategoriesState>(
+            builder: (context, state) {
+              if (state is CategoriesLoadInProgress) {
+                return SliverGrid.builder(
+                  itemCount: 2,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 250,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 2 / 1,
+                  ),
+                  itemBuilder: (context, index) => const Card.outlined(),
+                );
+              }
+              if (state is CategoriesLoadComplete) {
+                if (state.categories.isNotEmpty) {
+                  return SliverGrid.builder(
+                    itemCount: state.categories.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 250,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          childAspectRatio: 2 / 1,
+                        ),
+                    itemBuilder: (context, index) {
+                      return Card.outlined(
+                        color: colorSheme.primaryContainer,
+                        clipBehavior: Clip.hardEdge,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                UniconsSolid.table,
+                                color: colorSheme.onPrimaryContainer,
+                              ),
+                              const Spacer(),
+                              Text(
+                                state.categories[index].name,
+                                style: textTheme.headlineSmall!.copyWith(
+                                  color: colorSheme.onPrimaryContainer,
+                                ),
+                              ),
+                              Text(
+                                "${state.categories.length} Items",
+                                style: textTheme.labelSmall!.copyWith(
+                                  color: colorSheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+                return SliverToBoxAdapter(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text("Category kosong, Yuk tambahkan kategorynya"),
+                      FilledButton.tonalIcon(
+                        icon: const Icon(UniconsLine.plus_circle),
+                        onPressed: () {
+                          final CategoryItem category = const CategoryItem(
+                            id: 1,
+                            name: 'Americano',
+                            description: 'Hot black coffee',
+                          );
+
+                          context.read<CategoriesBloc>().add(
+                            CategoryInserted(categoryItem: category),
+                          );
+                        },
+                        label: const Text("Tambah Menu"),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return SliverGrid.builder(
+                itemCount: 2,
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 250,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 2 / 1,
+                ),
+                itemBuilder: (context, index) => const Card.outlined(),
+              );
+            },
+          ),
+          const SliverToBoxAdapter(child: Divider()),
           BlocBuilder<MenusBloc, MenusState>(
             builder: (context, state) {
               if (state is MenusLoadInProgress) {
@@ -150,7 +255,8 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text("Menu kosong, Yuk tambahkan menunya"),
-                      ElevatedButton(
+                      FilledButton.tonalIcon(
+                        icon: const Icon(UniconsLine.plus_circle),
                         onPressed: () {
                           final MenuItem menu = const MenuItem(
                             categoryId: 1,
@@ -164,7 +270,7 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                             MenuInserted(menuItem: menu),
                           );
                         },
-                        child: const Text("Tambah Menu"),
+                        label: const Text("Tambah Menu"),
                       ),
                     ],
                   ),
