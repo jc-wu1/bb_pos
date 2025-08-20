@@ -26,12 +26,12 @@ class _AppScaffoldWithNavbarState extends State<AppScaffoldWithNavbar> {
                   label: Text('Beranda'),
                 ),
                 const NavigationRailDestination(
-                  icon: Icon(UniconsLine.list_ul),
-                  label: Text('Menu'),
-                ),
-                const NavigationRailDestination(
                   icon: Icon(UniconsLine.receipt),
                   label: Text('Pesanan'),
+                ),
+                const NavigationRailDestination(
+                  icon: Icon(UniconsLine.list_ul),
+                  label: Text('Menu'),
                 ),
                 const NavigationRailDestination(
                   icon: Icon(UniconsLine.chart_pie),
@@ -48,9 +48,9 @@ class _AppScaffoldWithNavbarState extends State<AppScaffoldWithNavbar> {
                   case 0:
                     context.go('/dashboard');
                   case 1:
-                    context.go('/menus');
-                  case 2:
                     context.go('/orders');
+                  case 2:
+                    context.go('/menus');
                   case 3:
                     context.go('/reports');
                   case 4:
@@ -74,10 +74,10 @@ class _AppScaffoldWithNavbarState extends State<AppScaffoldWithNavbar> {
     if (location == '/dashboard') {
       return 0;
     }
-    if (location == '/menus') {
+    if (location == '/orders') {
       return 1;
     }
-    if (location == '/orders') {
+    if (location == '/menus') {
       return 2;
     }
     if (location == '/reports') {
