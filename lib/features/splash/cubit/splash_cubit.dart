@@ -12,6 +12,7 @@ class SplashCubit extends Cubit<SplashState> {
     emit(const SplashLoading());
     await Future.delayed(const Duration(seconds: 3), () async {
       await initDbService();
+      await initCoreDependencies();
     });
     emit(const SplashFinished());
   }
