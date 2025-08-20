@@ -58,6 +58,7 @@ class _AppScaffoldWithNavbarState extends State<AppScaffoldWithNavbar> {
                     context.go('/settings');
                   default:
                     context.go('/dashboard');
+                    print("ok");
                 }
               },
             ),
