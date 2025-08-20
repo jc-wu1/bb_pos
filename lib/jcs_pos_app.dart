@@ -24,6 +24,7 @@ class JcsPosApp extends StatelessWidget {
 
     return MaterialApp.router(
       title: 'JCS POS',
+      debugShowCheckedModeBanner: false,
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       routerConfig: appRouter,
     );
