@@ -15,6 +15,7 @@ class _AppScaffoldWithNavbarState extends State<AppScaffoldWithNavbar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const CustomAppBar(),
       body: SafeArea(
         child: Row(
           children: [
@@ -23,7 +24,7 @@ class _AppScaffoldWithNavbarState extends State<AppScaffoldWithNavbar> {
               destinations: <NavigationRailDestination>[
                 const NavigationRailDestination(
                   icon: Icon(UniconsLine.home_alt),
-                  label: Text('Beranda'),
+                  label: Text('Dashboard'),
                 ),
                 const NavigationRailDestination(
                   icon: Icon(UniconsLine.receipt),
