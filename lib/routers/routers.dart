@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app_scaffold_with_navbar.dart';
 import '../features/dashboard/dashboard_screen.dart';
-import '../features/menus/menus_screen.dart';
+import '../features/menus/display/menus_screen.dart';
 import '../features/orders/orders_screen.dart';
 import '../features/splash/splash.dart';
 
