@@ -39,13 +39,63 @@ class DbServices {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    // Run the CREATE {breeds} TABLE statement on the database.
-    await db.execute(
-      'CREATE TABLE breeds(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
+    await db.execute('''
+    CREATE TABLE tbl_categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      description TEXT
+    )
+    ''');
+
+    /// is_active = 1 = available, 0 = not available
+    await db.execute('''
+    CREATE TABLE tbl_menu_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      category_id INTEGER,
+      name TEXT NOT NULL,
+      description TEXT,
+      price REAL NOT NULL,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (category_id) REFERENCES tbl_categories(id)
+    )
+    ''');
+
+    /// status text = OPEN, PAID, CANCELED
+    await db.execute('''
+    CREATE TABLE tbl_orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_number TEXT NOT NULL UNIQUE,
+      customer_name TEXT,
+      order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      status TEXT NOT NULL DEFAULT 'OPEN', 
+      total_amount REAL DEFAULT 0
+    )
+    ''');
+    await db.execute('''
+    CREATE TABLE tbl_order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      menu_item_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      price REAL NOT NULL,
+      subtotal REAL NOT NULL,
+      FOREIGN KEY (order_id) REFERENCES tbl_orders(id),
+      FOREIGN KEY (menu_item_id) REFERENCES tbl_menu_items(id)
     );
-    // Run the CREATE {dogs} TABLE statement on the database.
-    await db.execute(
-      'CREATE TABLE dogs(id INTEGER PRIMARY KEY, name TEXT, age INTEGER, color INTEGER, breedId INTEGER, FOREIGN KEY (breedId) REFERENCES breeds(id) ON DELETE SET NULL)',
+    ''');
+
+    /// method = CASH, CARD, QR, etc.
+    await db.execute('''
+    CREATE TABLE tbl_payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      amount REAL NOT NULL,
+      method TEXT NOT NULL,
+      FOREIGN KEY (order_id) REFERENCES tbl_orders(id)
     );
+    ''');
   }
 }
