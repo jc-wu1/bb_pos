@@ -28,12 +28,11 @@ class DbServices {
       completeDbPath,
       onCreate: _onCreate,
       version: 1,
+      singleInstance: true,
       onConfigure: (db) async {
         return await db.execute("PRAGMA foreign_keys = ON");
       },
     );
-
-    print("Db successfully created!");
 
     return db;
   }
