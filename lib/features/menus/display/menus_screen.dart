@@ -4,12 +4,11 @@ import 'package:gap/gap.dart';
 import 'package:unicons/unicons.dart';
 
 import '../../../core/injector.dart';
-import '../../categories/data/model/category.dart';
 import '../../categories/display/bloc/categories_bloc.dart';
 import '../../categories/domain/usecases/categories_usecase.dart';
-import '../data/model/menu_model.dart';
 import '../domain/usecases/menus_usecase.dart';
 import 'bloc/menus_bloc.dart';
+import 'widgets/add_new_menu_dialog.dart';
 
 class MenusScreen extends StatelessWidget {
   const MenusScreen({super.key});
@@ -75,9 +74,9 @@ class _MenusScreenViewState extends State<MenusScreenView> {
             child: Row(
               spacing: 8,
               children: [
-                FilledButton.icon(
+                FilledButton.tonalIcon(
                   onPressed: () {},
-                  label: const Text("Buat menu baru"),
+                  label: const Text("Tambah Menu"),
                   icon: const Icon(UniconsLine.plus),
                 ),
               ],
@@ -155,29 +154,7 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                     },
                   );
                 }
-                return SliverToBoxAdapter(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text("Category kosong, Yuk tambahkan kategorynya"),
-                      FilledButton.tonalIcon(
-                        icon: const Icon(UniconsLine.plus_circle),
-                        onPressed: () {
-                          final CategoryItem category = const CategoryItem(
-                            id: 1,
-                            name: 'Americano',
-                            description: 'Hot black coffee',
-                          );
-
-                          context.read<CategoriesBloc>().add(
-                            CategoryInserted(categoryItem: category),
-                          );
-                        },
-                        label: const Text("Tambah Menu"),
-                      ),
-                    ],
-                  ),
-                );
+                return const SliverGap(1);
               }
               return SliverGrid.builder(
                 itemCount: 2,
@@ -191,7 +168,6 @@ class _MenusScreenViewState extends State<MenusScreenView> {
               );
             },
           ),
-          const SliverToBoxAdapter(child: Divider()),
           BlocBuilder<MenusBloc, MenusState>(
             builder: (context, state) {
               if (state is MenusLoadInProgress) {
@@ -203,7 +179,7 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                     crossAxisSpacing: 8,
                     childAspectRatio: 2 / 1,
                   ),
-                  itemBuilder: (context, index) => const Card.outlined(),
+                  itemBuilder: (context, index) => const Card.filled(),
                 );
               }
               if (state is MenusLoadComplete) {
@@ -218,7 +194,7 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                           childAspectRatio: 2 / 1,
                         ),
                     itemBuilder: (context, index) {
-                      return Card.outlined(
+                      return Card.filled(
                         color: colorSheme.primaryContainer,
                         clipBehavior: Clip.hardEdge,
                         child: Container(
@@ -252,23 +228,34 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                 }
                 return SliverToBoxAdapter(
                   child: Column(
+                    spacing: 16,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text("Menu kosong, Yuk tambahkan menunya"),
+                      Image.asset(
+                        "assets/images/hot-air-balloon.png",
+                        color: colorSheme.onSurface,
+                      ),
+                      Text(
+                        "Menu kosong, yuk tambahkan menunya",
+                        style: textTheme.titleMedium,
+                      ),
                       FilledButton.tonalIcon(
                         icon: const Icon(UniconsLine.plus_circle),
-                        onPressed: () {
-                          final MenuItem menu = const MenuItem(
-                            categoryId: 1,
-                            name: 'Americano',
-                            description: 'Hot black coffee',
-                            price: 2.50,
-                            category: "Beverages",
+                        onPressed: () async {
+                          final result = await showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return const Dialog(
+                                constraints: BoxConstraints(
+                                  maxWidth: 560,
+                                  minHeight: 280,
+                                ),
+                                child: AddNewMenuDialog(),
+                              );
+                            },
                           );
-
-                          context.read<MenusBloc>().add(
-                            MenuInserted(menuItem: menu),
-                          );
+                          print("dialog result $result");
                         },
                         label: const Text("Tambah Menu"),
                       ),
@@ -276,15 +263,31 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                   ),
                 );
               }
-              return SliverGrid.builder(
-                itemCount: 2,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 250,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 2 / 1,
+              if (state is MenusInitial) {
+                return const SliverGap(0);
+              }
+              return SliverToBoxAdapter(
+                child: Column(
+                  spacing: 16,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      "assets/images/FATAL Error 3 Streamline Barcelona.png",
+                      scale: 3,
+                    ),
+                    Text(
+                      "Aw snap, you got an error!",
+                      style: textTheme.titleMedium,
+                    ),
+                    FilledButton.tonalIcon(
+                      icon: const Icon(UniconsLine.refresh),
+                      onPressed: () async {
+                        context.read<MenusBloc>().add(const MenusFetched());
+                      },
+                      label: const Text("Retry"),
+                    ),
+                  ],
                 ),
-                itemBuilder: (context, index) => const Card.outlined(),
               );
             },
           ),
