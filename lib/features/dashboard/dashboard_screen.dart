@@ -20,7 +20,7 @@ class _DashboardScreenViewState extends State<DashboardScreenView> {
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
-    ColorScheme colorSheme = Theme.of(context).colorScheme;
+    // ColorScheme colorSheme = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
