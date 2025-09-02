@@ -2,6 +2,7 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:unicons/unicons.dart';
 
 import '../../../../app_scaffold_with_navbar.dart';
@@ -9,6 +10,7 @@ import '../../../../core/injector.dart';
 import '../../../categories/data/model/category.dart';
 import '../../../categories/display/bloc/categories_bloc.dart';
 import '../../../categories/domain/usecases/categories_usecase.dart';
+import '../controller/category_selector.dart';
 import 'add_new_category_dialog.dart';
 
 class AddNewMenuDialog extends StatelessWidget {
@@ -119,8 +121,12 @@ class _AddNewMenuDialogViewState extends State<AddNewMenuDialogView> {
                 margin: EdgeInsets.zero,
                 clipBehavior: Clip.hardEdge,
                 child: InkWell(
-                  onTap: () {
-                    print("upload gambar");
+                  onTap: () async {
+                    final ImagePicker picker = ImagePicker();
+                    final XFile? image = await picker.pickImage(
+                      source: ImageSource.gallery,
+                    );
+                    if (image == null) return;
                   },
                   child: Padding(
                     padding: const EdgeInsetsGeometry.all(16),
@@ -227,7 +233,7 @@ class _AddNewMenuDialogViewState extends State<AddNewMenuDialogView> {
           children: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop({"refresh_category": true});
               },
               child: const Text("Batal"),
             ),
@@ -239,8 +245,44 @@ class _AddNewMenuDialogViewState extends State<AddNewMenuDialogView> {
   }
 }
 
-class CategoriesSelector extends StatelessWidget {
+class CategoriesSelector extends StatefulWidget {
   const CategoriesSelector({super.key});
+
+  static Future<void> onAddNewCategoryPressed(BuildContext context) async {
+    final dialogResult = await showDialog<CategoryItem>(
+      context: context,
+      builder: (context) {
+        return const Dialog(
+          constraints: BoxConstraints(maxWidth: 560, minHeight: 280),
+          child: AddNewCategoryDialog(),
+        );
+      },
+    );
+    if (dialogResult == null) return;
+    if (!context.mounted) return;
+    context.read<CategoriesBloc>().add(
+      CategoryInserted(categoryItem: dialogResult),
+    );
+  }
+
+  @override
+  State<CategoriesSelector> createState() => _CategoriesSelectorState();
+}
+
+class _CategoriesSelectorState extends State<CategoriesSelector> {
+  late CategorySelector _categorySelector;
+
+  @override
+  void initState() {
+    super.initState();
+    _categorySelector = CategorySelector();
+  }
+
+  @override
+  void dispose() {
+    _categorySelector.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -264,65 +306,39 @@ class CategoriesSelector extends StatelessWidget {
                     label: const Text("Tambah Kategori Baru"),
                     avatar: const Icon(UniconsLine.plus_circle),
                     onPressed: () async {
-                      final dialogResult = await showDialog<CategoryItem>(
-                        context: context,
-                        builder: (context) {
-                          return const Dialog(
-                            constraints: BoxConstraints(
-                              maxWidth: 560,
-                              minHeight: 280,
-                            ),
-                            child: AddNewCategoryDialog(),
-                          );
-                        },
-                      );
-                      if (dialogResult == null) return;
-                      print(dialogResult.toString());
-                      if (!context.mounted) return;
-                      context.read<CategoriesBloc>().add(
-                        CategoryInserted(categoryItem: dialogResult),
-                      );
+                      await CategoriesSelector.onAddNewCategoryPressed(context);
                     },
                   ),
                 ),
               ],
             );
           }
-          return Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              ChoiceChip(
-                label: const Text("Kategori"),
-                selected: true,
-                onSelected: (value) {},
-              ),
-              ChoiceChip(
-                label: const Text("Makanan"),
-                selected: false,
-                onSelected: (value) {},
-              ),
-              ChoiceChip(
-                label: const Text("Minuman"),
-                selected: false,
-                onSelected: (value) {},
-              ),
-              ChoiceChip(
-                label: const Text("Side-dish"),
-                selected: false,
-                onSelected: (value) {},
-              ),
-              ChoiceChip(
-                label: const Text("A la Carte"),
-                selected: false,
-                onSelected: (value) {},
-              ),
-              ActionChip(
-                label: const Text("Tambah Kategori Baru"),
-                avatar: const Icon(UniconsLine.plus_circle),
-                onPressed: () {},
-              ),
-            ],
+          return ListenableBuilder(
+            listenable: _categorySelector,
+            builder: (context, child) {
+              return Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  ...state.categories.map((category) {
+                    return ChoiceChip(
+                      label: Text(category.name),
+                      selected: _categorySelector.selectedCategory == category,
+                      onSelected: (value) {
+                        _categorySelector.select(category);
+                      },
+                    );
+                  }),
+                  ActionChip(
+                    label: const Text("Tambah Kategori Baru"),
+                    avatar: const Icon(UniconsLine.plus_circle),
+                    onPressed: () async {
+                      await CategoriesSelector.onAddNewCategoryPressed(context);
+                    },
+                  ),
+                ],
+              );
+            },
           );
         }
         return const SizedBox.shrink();

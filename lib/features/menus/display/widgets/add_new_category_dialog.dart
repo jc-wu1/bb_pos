@@ -106,7 +106,7 @@ class _AddNewCategoryDialogState extends State<AddNewCategoryDialog> {
                       Navigator.of(context).pop(category);
                     }
                   },
-                  child: const Text("Tambah Menu"),
+                  child: const Text("Simpan"),
                 ),
               ],
             ),

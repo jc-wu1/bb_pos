@@ -40,6 +40,25 @@ class MenusScreenView extends StatefulWidget {
 }
 
 class _MenusScreenViewState extends State<MenusScreenView> {
+  Future<void> _onAddNewMenuPressed(BuildContext context) async {
+    final dialogResult = await showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return const Dialog(
+          constraints: BoxConstraints(maxWidth: 560, minHeight: 280),
+          child: AddNewMenuDialog(),
+        );
+      },
+    );
+    bool refreshRequested = dialogResult["refresh_category"] == true;
+    if (refreshRequested) {
+      if (!context.mounted) return;
+      context.read<MenusBloc>().add(const MenusFetched());
+      context.read<CategoriesBloc>().add(const CategoriesFetched());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -51,121 +70,105 @@ class _MenusScreenViewState extends State<MenusScreenView> {
         slivers: [
           const SliverGap(8),
           SliverToBoxAdapter(
-            child: Row(
-              spacing: 8,
-              children: [
-                Text("Menu Management", style: textTheme.titleLarge),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(UniconsLine.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      hint: const Text("Cari menu"),
-                    ),
-                  ),
+            child: TextField(
+              decoration: InputDecoration(
+                prefixIcon: const Icon(UniconsLine.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
                 ),
-              ],
+                hint: const Text("Cari menu"),
+              ),
             ),
           ),
-          const SliverGap(8),
-          SliverToBoxAdapter(
-            child: Row(
-              spacing: 8,
-              children: [
-                FilledButton.tonalIcon(
-                  onPressed: () {},
-                  label: const Text("Tambah Menu"),
-                  icon: const Icon(UniconsLine.plus),
-                ),
-              ],
-            ),
-          ),
-          const SliverGap(8),
-          SliverToBoxAdapter(
-            child: Row(
-              spacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () async {},
-                  label: const Text("Filter"),
-                  icon: const Icon(UniconsLine.filter),
-                ),
-              ],
-            ),
-          ),
-          const SliverGap(8),
+          const SliverGap(16),
+          SliverToBoxAdapter(child: Text("Menus", style: textTheme.titleLarge)),
+          const SliverGap(16),
           BlocBuilder<CategoriesBloc, CategoriesState>(
             builder: (context, state) {
               if (state is CategoriesLoadInProgress) {
-                return SliverGrid.builder(
-                  itemCount: 2,
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 250,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 2 / 1,
-                  ),
-                  itemBuilder: (context, index) => const Card.outlined(),
-                );
+                return const SliverGap(1);
               }
               if (state is CategoriesLoadComplete) {
                 if (state.categories.isNotEmpty) {
-                  return SliverGrid.builder(
-                    itemCount: state.categories.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 250,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                          childAspectRatio: 2 / 1,
-                        ),
-                    itemBuilder: (context, index) {
-                      return Card.outlined(
-                        color: colorSheme.primaryContainer,
-                        clipBehavior: Clip.hardEdge,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                UniconsSolid.table,
-                                color: colorSheme.onPrimaryContainer,
-                              ),
-                              const Spacer(),
-                              Text(
-                                state.categories[index].name,
-                                style: textTheme.headlineSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
+                  return SliverMainAxisGroup(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 42,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            separatorBuilder: (context, index) => const Gap(8),
+                            itemCount: state.categories.length + 2,
+                            itemBuilder: (_, int index) {
+                              if (index == 0) {
+                                return Center(
+                                  child: ActionChip(
+                                    avatar: CircleAvatar(
+                                      backgroundColor:
+                                          colorSheme.primaryContainer,
+                                      foregroundColor:
+                                          colorSheme.onPrimaryContainer,
+                                      child: const Icon(
+                                        UniconsLine.check,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    onPressed: () {},
+                                    label: const Text("Semua"),
+                                  ),
+                                );
+                              } else if (index == state.categories.length + 1) {
+                                return Center(
+                                  child: ActionChip(
+                                    avatar: CircleAvatar(
+                                      backgroundColor:
+                                          colorSheme.primaryContainer,
+                                      foregroundColor:
+                                          colorSheme.onPrimaryContainer,
+                                      child: const Icon(
+                                        UniconsLine.plus,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      CategoriesSelector.onAddNewCategoryPressed(
+                                        context,
+                                      );
+                                    },
+                                    label: const Text("Tambah kategori"),
+                                  ),
+                                );
+                              }
+                              return Center(
+                                child: ActionChip(
+                                  avatar: CircleAvatar(
+                                    backgroundColor:
+                                        colorSheme.primaryContainer,
+                                    foregroundColor:
+                                        colorSheme.onPrimaryContainer,
+                                    child: const Icon(
+                                      UniconsLine.file_alt,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  onPressed: () {},
+                                  label: Text(state.categories[index - 1].name),
                                 ),
-                              ),
-                              Text(
-                                "${state.categories.length} Items",
-                                style: textTheme.labelSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      const SliverGap(16),
+                      SliverGap(1, color: Colors.grey[300]),
+                      const SliverGap(16),
+                    ],
                   );
                 }
                 return const SliverGap(1);
               }
-              return SliverGrid.builder(
-                itemCount: 2,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 250,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 2 / 1,
-                ),
-                itemBuilder: (context, index) => const Card.outlined(),
-              );
+              return const SliverGap(1);
             },
           ),
           BlocBuilder<MenusBloc, MenusState>(
@@ -242,20 +245,7 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                       FilledButton.tonalIcon(
                         icon: const Icon(UniconsLine.plus_circle),
                         onPressed: () async {
-                          final result = await showDialog(
-                            barrierDismissible: false,
-                            context: context,
-                            builder: (context) {
-                              return const Dialog(
-                                constraints: BoxConstraints(
-                                  maxWidth: 560,
-                                  minHeight: 280,
-                                ),
-                                child: AddNewMenuDialog(),
-                              );
-                            },
-                          );
-                          print("dialog result $result");
+                          _onAddNewMenuPressed(context);
                         },
                         label: const Text("Tambah Menu"),
                       ),
