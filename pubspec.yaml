@@ -25,6 +25,9 @@ dependencies:
   google_fonts: ^6.3.0
   gap: ^3.0.1
   currency_text_input_formatter: ^2.3.0
+  supabase_flutter: ^2.10.0
+  image_picker: ^1.2.0
+  flutter_image_compress: ^2.4.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0
