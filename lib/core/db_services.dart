@@ -28,12 +28,11 @@ class DbServices {
       completeDbPath,
       onCreate: _onCreate,
       version: 1,
+      singleInstance: true,
       onConfigure: (db) async {
         return await db.execute("PRAGMA foreign_keys = ON");
       },
     );
-
-    print("Db successfully created!");
 
     return db;
   }
@@ -54,6 +53,7 @@ class DbServices {
       category_id INTEGER,
       name TEXT NOT NULL,
       description TEXT,
+      img_url TEXT,
       price REAL NOT NULL,
       is_active INTEGER NOT NULL DEFAULT 1,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -73,6 +73,7 @@ class DbServices {
       total_amount REAL DEFAULT 0
     )
     ''');
+
     await db.execute('''
     CREATE TABLE tbl_order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

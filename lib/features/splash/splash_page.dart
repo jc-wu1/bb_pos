@@ -9,6 +9,8 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return BlocListener<SplashCubit, SplashState>(
       listener: (context, state) {
         if (state is SplashError) {
@@ -21,8 +23,8 @@ class SplashScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
+        backgroundColor: colorScheme.surface,
+        appBar: AppBar(backgroundColor: colorScheme.surface, elevation: 0),
         body: Center(
           child: BlocBuilder<SplashCubit, SplashState>(
             builder: (context, state) {

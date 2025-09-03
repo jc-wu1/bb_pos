@@ -4,12 +4,13 @@ import 'package:gap/gap.dart';
 import 'package:unicons/unicons.dart';
 
 import '../../../core/injector.dart';
-import '../../categories/data/model/category.dart';
+import '../../../main.dart';
 import '../../categories/display/bloc/categories_bloc.dart';
 import '../../categories/domain/usecases/categories_usecase.dart';
 import '../data/model/menu_model.dart';
 import '../domain/usecases/menus_usecase.dart';
 import 'bloc/menus_bloc.dart';
+import 'widgets/add_new_menu_dialog.dart';
 
 class MenusScreen extends StatelessWidget {
   const MenusScreen({super.key});
@@ -41,6 +42,31 @@ class MenusScreenView extends StatefulWidget {
 }
 
 class _MenusScreenViewState extends State<MenusScreenView> {
+  Future<void> _onAddNewMenuPressed(BuildContext context) async {
+    final dialogResult = await showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return const Dialog(
+          constraints: BoxConstraints(maxWidth: 560, minHeight: 280),
+          child: AddNewMenuDialog(),
+        );
+      },
+    );
+    if (dialogResult is Map<String, dynamic>) {
+      bool refreshRequested = dialogResult["refresh_category"] == true;
+      if (refreshRequested) {
+        if (!context.mounted) return;
+        context.read<MenusBloc>().add(const MenusFetched());
+        context.read<CategoriesBloc>().add(const CategoriesFetched());
+      }
+    } else if (dialogResult is MenuItem) {
+      if (!context.mounted) return;
+      context.read<CategoriesBloc>().add(const CategoriesFetched());
+      context.read<MenusBloc>().add(MenuInserted(menuItem: dialogResult));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -52,146 +78,108 @@ class _MenusScreenViewState extends State<MenusScreenView> {
         slivers: [
           const SliverGap(8),
           SliverToBoxAdapter(
-            child: Row(
-              spacing: 8,
-              children: [
-                Text("Menu Management", style: textTheme.titleLarge),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(UniconsLine.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      hint: const Text("Cari menu"),
-                    ),
-                  ),
+            child: TextField(
+              decoration: InputDecoration(
+                prefixIcon: const Icon(UniconsLine.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
                 ),
-              ],
+                hint: const Text("Cari menu"),
+              ),
             ),
           ),
-          const SliverGap(8),
-          SliverToBoxAdapter(
-            child: Row(
-              spacing: 8,
-              children: [
-                FilledButton.icon(
-                  onPressed: () {},
-                  label: const Text("Buat menu baru"),
-                  icon: const Icon(UniconsLine.plus),
-                ),
-              ],
-            ),
-          ),
-          const SliverGap(8),
-          SliverToBoxAdapter(
-            child: Row(
-              spacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () async {},
-                  label: const Text("Filter"),
-                  icon: const Icon(UniconsLine.filter),
-                ),
-              ],
-            ),
-          ),
-          const SliverGap(8),
+          const SliverGap(16),
+          SliverToBoxAdapter(child: Text("Menus", style: textTheme.titleLarge)),
+          const SliverGap(16),
           BlocBuilder<CategoriesBloc, CategoriesState>(
             builder: (context, state) {
               if (state is CategoriesLoadInProgress) {
-                return SliverGrid.builder(
-                  itemCount: 2,
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 250,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 2 / 1,
-                  ),
-                  itemBuilder: (context, index) => const Card.outlined(),
-                );
+                return const SliverGap(1);
               }
               if (state is CategoriesLoadComplete) {
                 if (state.categories.isNotEmpty) {
-                  return SliverGrid.builder(
-                    itemCount: state.categories.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 250,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                          childAspectRatio: 2 / 1,
-                        ),
-                    itemBuilder: (context, index) {
-                      return Card.outlined(
-                        color: colorSheme.primaryContainer,
-                        clipBehavior: Clip.hardEdge,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(
-                                UniconsSolid.table,
-                                color: colorSheme.onPrimaryContainer,
-                              ),
-                              const Spacer(),
-                              Text(
-                                state.categories[index].name,
-                                style: textTheme.headlineSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
+                  return SliverMainAxisGroup(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 42,
+                          child: ListView.separated(
+                            key: const PageStorageKey<String>('myListViewKey'),
+                            scrollDirection: Axis.horizontal,
+                            separatorBuilder: (context, index) => const Gap(8),
+                            itemCount: state.categories.length + 2,
+                            itemBuilder: (_, int index) {
+                              if (index == 0) {
+                                return Center(
+                                  child: ActionChip(
+                                    avatar: CircleAvatar(
+                                      backgroundColor:
+                                          colorSheme.primaryContainer,
+                                      foregroundColor:
+                                          colorSheme.onPrimaryContainer,
+                                      child: const Icon(
+                                        UniconsLine.check,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    onPressed: () {},
+                                    label: const Text("Semua"),
+                                  ),
+                                );
+                              } else if (index == state.categories.length + 1) {
+                                return Center(
+                                  child: ActionChip(
+                                    avatar: CircleAvatar(
+                                      backgroundColor:
+                                          colorSheme.primaryContainer,
+                                      foregroundColor:
+                                          colorSheme.onPrimaryContainer,
+                                      child: const Icon(
+                                        UniconsLine.plus,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      CategoriesSelector.onAddNewCategoryPressed(
+                                        context,
+                                      );
+                                    },
+                                    label: const Text("Tambah kategori"),
+                                  ),
+                                );
+                              }
+                              return Center(
+                                child: ActionChip(
+                                  avatar: CircleAvatar(
+                                    backgroundColor:
+                                        colorSheme.primaryContainer,
+                                    foregroundColor:
+                                        colorSheme.onPrimaryContainer,
+                                    child: const Icon(
+                                      UniconsLine.file_alt,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  onPressed: () {},
+                                  label: Text(state.categories[index - 1].name),
                                 ),
-                              ),
-                              Text(
-                                "${state.categories.length} Items",
-                                style: textTheme.labelSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
-                                ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      const SliverGap(16),
+                      SliverGap(1, color: Colors.grey[300]),
+                      const SliverGap(16),
+                    ],
                   );
                 }
-                return SliverToBoxAdapter(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text("Category kosong, Yuk tambahkan kategorynya"),
-                      FilledButton.tonalIcon(
-                        icon: const Icon(UniconsLine.plus_circle),
-                        onPressed: () {
-                          final CategoryItem category = const CategoryItem(
-                            id: 1,
-                            name: 'Americano',
-                            description: 'Hot black coffee',
-                          );
-
-                          context.read<CategoriesBloc>().add(
-                            CategoryInserted(categoryItem: category),
-                          );
-                        },
-                        label: const Text("Tambah Menu"),
-                      ),
-                    ],
-                  ),
-                );
+                return const SliverGap(1);
               }
-              return SliverGrid.builder(
-                itemCount: 2,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 250,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 2 / 1,
-                ),
-                itemBuilder: (context, index) => const Card.outlined(),
-              );
+              return const SliverGap(1);
             },
           ),
-          const SliverToBoxAdapter(child: Divider()),
           BlocBuilder<MenusBloc, MenusState>(
             builder: (context, state) {
               if (state is MenusLoadInProgress) {
@@ -203,72 +191,113 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                     crossAxisSpacing: 8,
                     childAspectRatio: 2 / 1,
                   ),
-                  itemBuilder: (context, index) => const Card.outlined(),
+                  itemBuilder: (context, index) => const Card.filled(),
                 );
               }
               if (state is MenusLoadComplete) {
                 if (state.menus.isNotEmpty) {
                   return SliverGrid.builder(
-                    itemCount: state.menus.length,
+                    itemCount: state.menus.length + 1,
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 250,
                           mainAxisSpacing: 8,
                           crossAxisSpacing: 8,
-                          childAspectRatio: 2 / 1,
+                          childAspectRatio: 4 / 6,
                         ),
                     itemBuilder: (context, index) {
-                      return Card.outlined(
-                        color: colorSheme.primaryContainer,
-                        clipBehavior: Clip.hardEdge,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
+                      if (index == 0) {
+                        return Card.outlined(
+                          clipBehavior: Clip.hardEdge,
+                          child: InkWell(
+                            onTap: () {
+                              _onAddNewMenuPressed(context);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    UniconsLine.plus_circle,
+                                    color: colorSheme.onPrimaryContainer,
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    "Tambah baru",
+                                    style: textTheme.headlineSmall!.copyWith(
+                                      color: colorSheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Card.filled(
+                          color: colorSheme.primaryContainer,
+                          clipBehavior: Clip.hardEdge,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(
-                                UniconsSolid.table,
-                                color: colorSheme.onPrimaryContainer,
-                              ),
-                              const Spacer(),
-                              Text(
-                                state.menus[index].name,
-                                style: textTheme.headlineSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
+                              if (state.menus[index - 1].imageUrl == null) ...[
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Icon(
+                                    UniconsSolid.table,
+                                    color: colorSheme.onPrimaryContainer,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                "${state.menus.length} Items",
-                                style: textTheme.labelSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
+                              ] else ...[
+                                SizedBox(
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(12),
+                                      bottomRight: Radius.circular(12),
+                                    ),
+                                    child: Image.network(
+                                      "$baseImgUrl${state.menus[index - 1].imageUrl}",
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  state.menus[index - 1].name,
+                                  style: textTheme.headlineSmall!.copyWith(
+                                    color: colorSheme.onPrimaryContainer,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                   );
                 }
                 return SliverToBoxAdapter(
                   child: Column(
+                    spacing: 16,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text("Menu kosong, Yuk tambahkan menunya"),
+                      Image.asset(
+                        "assets/images/hot-air-balloon.png",
+                        color: colorSheme.onSurface,
+                      ),
+                      Text(
+                        "Menu kosong, yuk tambahkan menunya",
+                        style: textTheme.titleMedium,
+                      ),
                       FilledButton.tonalIcon(
                         icon: const Icon(UniconsLine.plus_circle),
-                        onPressed: () {
-                          final MenuItem menu = const MenuItem(
-                            categoryId: 1,
-                            name: 'Americano',
-                            description: 'Hot black coffee',
-                            price: 2.50,
-                            category: "Beverages",
-                          );
-
-                          context.read<MenusBloc>().add(
-                            MenuInserted(menuItem: menu),
-                          );
+                        onPressed: () async {
+                          _onAddNewMenuPressed(context);
                         },
                         label: const Text("Tambah Menu"),
                       ),
@@ -276,15 +305,31 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                   ),
                 );
               }
-              return SliverGrid.builder(
-                itemCount: 2,
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 250,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 2 / 1,
+              if (state is MenusInitial) {
+                return const SliverGap(0);
+              }
+              return SliverToBoxAdapter(
+                child: Column(
+                  spacing: 16,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      "assets/images/FATAL Error 3 Streamline Barcelona.png",
+                      scale: 3,
+                    ),
+                    Text(
+                      "Aw snap, you got an error!",
+                      style: textTheme.titleMedium,
+                    ),
+                    FilledButton.tonalIcon(
+                      icon: const Icon(UniconsLine.refresh),
+                      onPressed: () async {
+                        context.read<MenusBloc>().add(const MenusFetched());
+                      },
+                      label: const Text("Retry"),
+                    ),
+                  ],
                 ),
-                itemBuilder: (context, index) => const Card.outlined(),
               );
             },
           ),
