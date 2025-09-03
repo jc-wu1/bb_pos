@@ -4,8 +4,10 @@ import 'package:gap/gap.dart';
 import 'package:unicons/unicons.dart';
 
 import '../../../core/injector.dart';
+import '../../../main.dart';
 import '../../categories/display/bloc/categories_bloc.dart';
 import '../../categories/domain/usecases/categories_usecase.dart';
+import '../data/model/menu_model.dart';
 import '../domain/usecases/menus_usecase.dart';
 import 'bloc/menus_bloc.dart';
 import 'widgets/add_new_menu_dialog.dart';
@@ -51,11 +53,17 @@ class _MenusScreenViewState extends State<MenusScreenView> {
         );
       },
     );
-    bool refreshRequested = dialogResult["refresh_category"] == true;
-    if (refreshRequested) {
+    if (dialogResult is Map<String, dynamic>) {
+      bool refreshRequested = dialogResult["refresh_category"] == true;
+      if (refreshRequested) {
+        if (!context.mounted) return;
+        context.read<MenusBloc>().add(const MenusFetched());
+        context.read<CategoriesBloc>().add(const CategoriesFetched());
+      }
+    } else if (dialogResult is MenuItem) {
       if (!context.mounted) return;
-      context.read<MenusBloc>().add(const MenusFetched());
       context.read<CategoriesBloc>().add(const CategoriesFetched());
+      context.read<MenusBloc>().add(MenuInserted(menuItem: dialogResult));
     }
   }
 
@@ -97,6 +105,7 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                           width: double.infinity,
                           height: 42,
                           child: ListView.separated(
+                            key: const PageStorageKey<String>('myListViewKey'),
                             scrollDirection: Axis.horizontal,
                             separatorBuilder: (context, index) => const Gap(8),
                             itemCount: state.categories.length + 2,
@@ -188,44 +197,87 @@ class _MenusScreenViewState extends State<MenusScreenView> {
               if (state is MenusLoadComplete) {
                 if (state.menus.isNotEmpty) {
                   return SliverGrid.builder(
-                    itemCount: state.menus.length,
+                    itemCount: state.menus.length + 1,
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 250,
                           mainAxisSpacing: 8,
                           crossAxisSpacing: 8,
-                          childAspectRatio: 2 / 1,
+                          childAspectRatio: 4 / 6,
                         ),
                     itemBuilder: (context, index) {
-                      return Card.filled(
-                        color: colorSheme.primaryContainer,
-                        clipBehavior: Clip.hardEdge,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
+                      if (index == 0) {
+                        return Card.outlined(
+                          clipBehavior: Clip.hardEdge,
+                          child: InkWell(
+                            onTap: () {
+                              _onAddNewMenuPressed(context);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    UniconsLine.plus_circle,
+                                    color: colorSheme.onPrimaryContainer,
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    "Tambah baru",
+                                    style: textTheme.headlineSmall!.copyWith(
+                                      color: colorSheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Card.filled(
+                          color: colorSheme.primaryContainer,
+                          clipBehavior: Clip.hardEdge,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(
-                                UniconsSolid.table,
-                                color: colorSheme.onPrimaryContainer,
-                              ),
-                              const Spacer(),
-                              Text(
-                                state.menus[index].name,
-                                style: textTheme.headlineSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
+                              if (state.menus[index - 1].imageUrl == null) ...[
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Icon(
+                                    UniconsSolid.table,
+                                    color: colorSheme.onPrimaryContainer,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                "${state.menus.length} Items",
-                                style: textTheme.labelSmall!.copyWith(
-                                  color: colorSheme.onPrimaryContainer,
+                              ] else ...[
+                                SizedBox(
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(12),
+                                      bottomRight: Radius.circular(12),
+                                    ),
+                                    child: Image.network(
+                                      "$baseImgUrl${state.menus[index - 1].imageUrl}",
+                                      fit: BoxFit.fill,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text(
+                                  state.menus[index - 1].name,
+                                  style: textTheme.headlineSmall!.copyWith(
+                                    color: colorSheme.onPrimaryContainer,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                   );
                 }
