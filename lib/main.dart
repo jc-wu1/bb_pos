@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'jcs_pos_app.dart';
 
 const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const baseImgUrl = String.fromEnvironment('PUBLIC_IMG_URL');
 const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
 
 Future<void> main() async {
