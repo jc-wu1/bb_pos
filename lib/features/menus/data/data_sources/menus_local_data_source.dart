@@ -15,7 +15,7 @@ class MenusLocalDataSourceImpl implements MenusLocalDataSource {
   @override
   Future<List<MenuItem>> fetchMenuItems() async {
     final List<Map<String, dynamic>> queryResult = await _db.rawQuery('''
-      SELECT mi.id, mi.name, mi.description, mi.price, c.name AS category
+      SELECT mi.id, mi.name, mi.description, mi.price, mi.img_url, c.name AS category
       FROM tbl_menu_items mi
       JOIN tbl_categories c ON mi.category_id = c.id
     ''');
@@ -24,10 +24,10 @@ class MenusLocalDataSourceImpl implements MenusLocalDataSource {
 
   @override
   Future<int> insertMenuItem(MenuItem menuItem) async {
-    final queryResult = await _db.rawInsert('''
-      INSERT INTO tbl_menu_items (category_id, name, description, price)
-      VALUES (1, 'Americano', 'Hot black coffee', 2.50)
-    ''', []);
+    final queryResult = await _db.insert(
+      "tbl_menu_items",
+      menuItem.toMapInsert(),
+    );
     return queryResult;
   }
 }

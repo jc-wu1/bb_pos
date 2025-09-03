@@ -7,6 +7,7 @@ class MenuItem extends Equatable {
   final double price;
   final int? categoryId;
   final String category;
+  final String? imageUrl;
 
   const MenuItem({
     this.id,
@@ -15,6 +16,7 @@ class MenuItem extends Equatable {
     required this.price,
     this.categoryId,
     required this.category,
+    this.imageUrl,
   });
 
   factory MenuItem.fromMap(Map<String, dynamic> map) {
@@ -24,6 +26,7 @@ class MenuItem extends Equatable {
       description: map['description'] as String?,
       price: map['price'] as double,
       category: map['category'] as String,
+      imageUrl: map['img_url'] as String?,
     );
   }
 
@@ -32,6 +35,7 @@ class MenuItem extends Equatable {
     'name': name,
     'description': description,
     'price': price,
+    'img_url': imageUrl,
   };
 
   @override
