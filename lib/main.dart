@@ -1,19 +1,23 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'firebase_options.dart';
 import 'jcs_pos_app.dart';
 
-const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const baseImgUrl = String.fromEnvironment('PUBLIC_IMG_URL');
-const supabaseKey = String.fromEnvironment('SUPABASE_KEY');
+late final FirebaseApp app;
+late final FirebaseAuth auth;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+  app = await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  auth = FirebaseAuth.instanceFor(app: app);
 
   if (Platform.isAndroid) {
     await FlutterDisplayMode.setHighRefreshRate();

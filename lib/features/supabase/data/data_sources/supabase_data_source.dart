@@ -1,27 +1,25 @@
 import 'dart:io';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 abstract class SupabaseDataSource {
-  Future<String> uploadImage(File fileImage);
-  Future<FileObject> removeFile(String path);
+  Future<TaskSnapshot> uploadImage(File fileImage);
+  Future<void> removeFile(String path);
 }
 
 class SupabaseDataSourceImpl implements SupabaseDataSource {
   @override
-  Future<String> uploadImage(File fileImage) async {
-    final path = "uploads/${DateTime.now().millisecondsSinceEpoch}";
-    final uploadResult = await Supabase.instance.client.storage
-        .from("m_images")
-        .upload(path, fileImage);
+  Future<TaskSnapshot> uploadImage(File fileImage) async {
+    final path = "uploads/${DateTime.now().millisecondsSinceEpoch}.jpg";
+    final uploadResult = await FirebaseStorage.instance
+        .ref()
+        .child(path)
+        .putFile(fileImage);
     return uploadResult;
   }
 
   @override
-  Future<FileObject> removeFile(String path) async {
-    final uploadResult = await Supabase.instance.client.storage
-        .from("m_images")
-        .remove([path]);
-    return uploadResult.first;
+  Future<void> removeFile(String path) async {
+    await FirebaseStorage.instance.ref().child(path).delete();
   }
 }

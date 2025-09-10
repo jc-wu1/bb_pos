@@ -1,4 +1,3 @@
-import 'package:bb_pos/features/supabase/data/data_sources/supabase_data_source.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -10,9 +9,6 @@ import '../features/menus/data/data_sources/menus_local_data_source.dart';
 import '../features/menus/data/repositories/menus_repository_impl.dart';
 import '../features/menus/domain/repositories/menus_repository.dart';
 import '../features/menus/domain/usecases/menus_usecase.dart';
-import '../features/supabase/data/repositories/supabase_repository_impl.dart';
-import '../features/supabase/domain/repositories/supabase_repository.dart';
-import '../features/supabase/domain/usecases/supabase_usecase.dart';
 import 'db_services.dart';
 
 final sl = GetIt.instance;
@@ -30,7 +26,7 @@ Future<void> initCoreDependencies() async {
   sl.registerLazySingleton<MenusLocalDataSource>(
     () => MenusLocalDataSourceImpl(db: sl<Database>()),
   );
-  sl.registerLazySingleton<SupabaseDataSource>(() => SupabaseDataSourceImpl());
+  // sl.registerLazySingleton<SupabaseDataSource>(() => SupabaseDataSourceImpl());
   ////
 
   /// Repositories
@@ -42,9 +38,9 @@ Future<void> initCoreDependencies() async {
   sl.registerLazySingleton<MenusRepository>(
     () => MenusRepositoryImpl(localDataSource: sl<MenusLocalDataSource>()),
   );
-  sl.registerLazySingleton<SupabaseRepository>(
-    () => SupabaseRepositoryImpl(dataSource: sl<SupabaseDataSource>()),
-  );
+  // sl.registerLazySingleton<SupabaseRepository>(
+  //   () => SupabaseRepositoryImpl(dataSource: sl<SupabaseDataSource>()),
+  // );
   ////
 
   /// Usecase
@@ -54,8 +50,8 @@ Future<void> initCoreDependencies() async {
   sl.registerLazySingleton<MenusUsecase>(
     () => MenusUsecase(repository: sl<MenusRepository>()),
   );
-  sl.registerLazySingleton<SupabaseUsecase>(
-    () => SupabaseUsecase(repository: sl<SupabaseRepository>()),
-  );
+  // sl.registerLazySingleton<SupabaseUsecase>(
+  //   () => SupabaseUsecase(repository: sl<SupabaseRepository>()),
+  // );
   ////
 }

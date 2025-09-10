@@ -259,7 +259,8 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                                       bottomRight: Radius.circular(12),
                                     ),
                                     child: Image.network(
-                                      "$baseImgUrl${state.menus[index - 1].imageUrl}",
+                                      // "$baseImgUrl${state.menus[index - 1].imageUrl}",
+                                      "",
                                       fit: BoxFit.fill,
                                     ),
                                   ),

@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 abstract class SupabaseRepository {
-  Future<String> uploadImage(File imageFile);
-  Future<FileObject> deleteImage(String path);
+  Future<TaskSnapshot> uploadImage(File imageFile);
+  Future<void> deleteImage(String path);
 }

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "683093766035",
+    "project_id": "jcs-bb-pos",
+    "storage_bucket": "jcs-bb-pos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:683093766035:android:7839e2f0b5caad28a7c266",
+        "android_client_info": {
+          "package_name": "com.jcstudios.bb_pos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "683093766035-u93mf6itr3nk348m2rnfi9dac24b6guv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jcstudios.bb_pos",
+            "certificate_hash": "126530d608b40de2e8b248143ca72d43a966af84"
+          }
+        },
+        {
+          "client_id": "683093766035-1t5dfhdl00mjloe0bod4l9a27jqp065d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBM734OfAZUy4OTMl9iITb5Jz6HYnBg0o0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "683093766035-1t5dfhdl00mjloe0bod4l9a27jqp065d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "683093766035-k3kqm2qh2tl4g6bmnk6sgj8om49cno56.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jcstudios.bbPos"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

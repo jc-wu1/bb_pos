@@ -105,7 +105,7 @@ class _AddNewMenuDialogViewState extends State<AddNewMenuDialogView> {
     final File imageFile = File(image.path);
     final result = await sl<SupabaseUsecase>().uploadImage(imageFile);
     _imageController.stopLoading();
-    _imageController.setImage(result);
+    _imageController.setImage(result.storage.bucket);
   }
 
   @override
@@ -200,10 +200,7 @@ class _AddNewMenuDialogViewState extends State<AddNewMenuDialogView> {
                               SizedBox(
                                 height: 150,
                                 width: 150,
-                                child: Image.network(
-                                  "$baseImgUrl$imagePath",
-                                  fit: BoxFit.cover,
-                                ),
+                                child: Image.network("", fit: BoxFit.cover),
                               ),
                               IconButton(
                                 onPressed: () async {
