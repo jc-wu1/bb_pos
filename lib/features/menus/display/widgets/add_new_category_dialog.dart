@@ -5,7 +5,10 @@ import 'package:unicons/unicons.dart';
 import '../../../categories/data/model/category.dart';
 
 class AddNewCategoryDialog extends StatefulWidget {
-  const AddNewCategoryDialog({super.key});
+  const AddNewCategoryDialog({super.key, this.categoryName, this.categoryDesc});
+
+  final String? categoryName;
+  final String? categoryDesc;
 
   @override
   State<AddNewCategoryDialog> createState() => _AddNewCategoryDialogState();
@@ -20,8 +23,9 @@ class _AddNewCategoryDialogState extends State<AddNewCategoryDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _descriptionController = TextEditingController();
+    _nameController = TextEditingController()..text = widget.categoryName ?? "";
+    _descriptionController = TextEditingController()
+      ..text = widget.categoryDesc ?? "";
   }
 
   @override
