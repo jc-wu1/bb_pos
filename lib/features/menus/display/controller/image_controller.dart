@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class ImageController extends ChangeNotifier {
   bool isLoading = false;
-  String? _imagePath;
-  String? get imagePath => _imagePath;
+  File? _imagePath;
+  File? get imagePath => _imagePath;
 
   void setLoading() {
     isLoading = true;
@@ -15,7 +17,7 @@ class ImageController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setImage(String image) {
+  void setImage(File? image) {
     _imagePath = image;
     notifyListeners();
   }
