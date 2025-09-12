@@ -496,20 +496,26 @@ class _MenusScreenViewState extends State<MenusScreenView> {
 
   Widget _getImage(String? imagePath) {
     if (imagePath == null) {
-      return Image.asset(
-        "assets/images/Home Cooked Meal.png",
-        fit: BoxFit.fitWidth,
+      return AspectRatio(
+        aspectRatio: 1,
+        child: Image.asset(
+          "assets/images/Home Cooked Meal.png",
+          fit: BoxFit.fitWidth,
+        ),
       );
     } else {
-      return Image.file(
-        File(imagePath),
-        fit: BoxFit.fitWidth,
-        errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            "assets/images/Home Cooked Meal.png",
-            fit: BoxFit.fitWidth,
-          );
-        },
+      return AspectRatio(
+        aspectRatio: 1,
+        child: Image.file(
+          File(imagePath),
+          fit: BoxFit.fitWidth,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              "assets/images/Home Cooked Meal.png",
+              fit: BoxFit.fitWidth,
+            );
+          },
+        ),
       );
     }
   }
