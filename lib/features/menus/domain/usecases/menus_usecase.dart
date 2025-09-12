@@ -7,9 +7,12 @@ class MenusUsecase {
   MenusUsecase({required MenusRepository repository})
     : _repository = repository;
 
-  Future<List<MenuItem>> getMenuItems() async =>
-      await _repository.getMenuItems();
+  Future<List<MenuItem>> getMenuItems({String? categoryName}) async =>
+      await _repository.getMenuItems(categoryName: categoryName);
 
   Future<int> addMenuItem(MenuItem menuItem) async =>
       await _repository.insertMenuItem(menuItem);
+
+  Future<int> deleteMenuItem(int menuId) async =>
+      await _repository.deleteMenuItem(menuId);
 }

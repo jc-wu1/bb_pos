@@ -9,12 +9,17 @@ class MenusRepositoryImpl implements MenusRepository {
     : _localDataSource = localDataSource;
 
   @override
-  Future<List<MenuItem>> getMenuItems() {
-    return _localDataSource.fetchMenuItems();
+  Future<List<MenuItem>> getMenuItems({String? categoryName}) {
+    return _localDataSource.fetchMenuItems(categoryName: categoryName);
   }
 
   @override
   Future<int> insertMenuItem(MenuItem menuItem) {
     return _localDataSource.insertMenuItem(menuItem);
+  }
+
+  @override
+  Future<int> deleteMenuItem(int menuId) {
+    return _localDataSource.deleteMenuItem(menuId);
   }
 }

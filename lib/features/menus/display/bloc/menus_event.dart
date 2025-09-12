@@ -8,7 +8,8 @@ sealed class MenusEvent extends Equatable {
 }
 
 final class MenusFetched extends MenusEvent {
-  const MenusFetched();
+  final String? categoryName;
+  const MenusFetched({this.categoryName});
 }
 
 final class MenuInserted extends MenusEvent {
@@ -18,4 +19,13 @@ final class MenuInserted extends MenusEvent {
 
   @override
   List<Object> get props => [menuItem];
+}
+
+final class MenuDeleted extends MenusEvent {
+  final int menuId;
+
+  const MenuDeleted({required this.menuId});
+
+  @override
+  List<Object> get props => [menuId];
 }

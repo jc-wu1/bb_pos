@@ -17,6 +17,7 @@ class MenusBloc extends Bloc<MenusEvent, MenusState> {
       super(MenusInitial()) {
     on<MenusFetched>(_onMenuFetched);
     on<MenuInserted>(_onMenuInserted);
+    on<MenuDeleted>(_onMenuDeleted);
   }
 
   Future<void> _onMenuFetched(
@@ -24,7 +25,9 @@ class MenusBloc extends Bloc<MenusEvent, MenusState> {
     Emitter<MenusState> emit,
   ) async {
     emit(MenusLoadInProgress());
-    final result = await _usecase.getMenuItems();
+    final result = await _usecase.getMenuItems(
+      categoryName: event.categoryName,
+    );
     emit(MenusLoadComplete(menus: result));
   }
 
@@ -32,8 +35,15 @@ class MenusBloc extends Bloc<MenusEvent, MenusState> {
     MenuInserted event,
     Emitter<MenusState> emit,
   ) async {
-    emit(MenusLoadInProgress());
     await _usecase.addMenuItem(event.menuItem);
+    add(const MenusFetched());
+  }
+
+  Future<void> _onMenuDeleted(
+    MenuDeleted event,
+    Emitter<MenusState> emit,
+  ) async {
+    await _usecase.deleteMenuItem(event.menuId);
     add(const MenusFetched());
   }
 }

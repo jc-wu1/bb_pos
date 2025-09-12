@@ -1,10 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:intl/intl.dart';
 import 'package:unicons/unicons.dart';
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 import '../../../core/injector.dart';
-import '../../../main.dart';
+import '../../categories/data/model/category.dart';
 import '../../categories/display/bloc/categories_bloc.dart';
 import '../../categories/domain/usecases/categories_usecase.dart';
 import '../data/model/menu_model.dart';
@@ -89,7 +94,7 @@ class _MenusScreenViewState extends State<MenusScreenView> {
             ),
           ),
           const SliverGap(16),
-          SliverToBoxAdapter(child: Text("Menus", style: textTheme.titleLarge)),
+          SliverToBoxAdapter(child: Text("Menu", style: textTheme.titleLarge)),
           const SliverGap(16),
           BlocBuilder<CategoriesBloc, CategoriesState>(
             builder: (context, state) {
@@ -123,7 +128,11 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                                         size: 18,
                                       ),
                                     ),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      context.read<MenusBloc>().add(
+                                        const MenusFetched(),
+                                      );
+                                    },
                                     label: const Text("Semua"),
                                   ),
                                 );
@@ -150,19 +159,40 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                                 );
                               }
                               return Center(
-                                child: ActionChip(
-                                  avatar: CircleAvatar(
-                                    backgroundColor:
-                                        colorSheme.primaryContainer,
-                                    foregroundColor:
-                                        colorSheme.onPrimaryContainer,
-                                    child: const Icon(
-                                      UniconsLine.file_alt,
-                                      size: 18,
+                                child: GestureDetector(
+                                  onLongPress: () {
+                                    _showCategoryOptionsBottomSheet(
+                                      context,
+                                      textTheme,
+                                      colorSheme,
+                                      state.categories[index - 1],
+                                    );
+                                  },
+                                  child: ActionChip(
+                                    avatar: CircleAvatar(
+                                      backgroundColor:
+                                          colorSheme.primaryContainer,
+                                      foregroundColor:
+                                          colorSheme.onPrimaryContainer,
+                                      child: HugeIcon(
+                                        icon: HugeIcons
+                                            .strokeRoundedMenuRestaurant,
+                                        color: colorSheme.onPrimaryContainer,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      context.read<MenusBloc>().add(
+                                        MenusFetched(
+                                          categoryName:
+                                              state.categories[index - 1].name,
+                                        ),
+                                      );
+                                    },
+                                    label: Text(
+                                      state.categories[index - 1].name,
                                     ),
                                   ),
-                                  onPressed: () {},
-                                  label: Text(state.categories[index - 1].name),
                                 ),
                               );
                             },
@@ -183,31 +213,23 @@ class _MenusScreenViewState extends State<MenusScreenView> {
           BlocBuilder<MenusBloc, MenusState>(
             builder: (context, state) {
               if (state is MenusLoadInProgress) {
-                return SliverGrid.builder(
-                  itemCount: 2,
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 250,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 2 / 1,
-                  ),
-                  itemBuilder: (context, index) => const Card.filled(),
-                );
+                return const SliverGap(0);
               }
               if (state is MenusLoadComplete) {
                 if (state.menus.isNotEmpty) {
                   return SliverGrid.builder(
+                    key: const PageStorageKey<String>('listMenus'),
                     itemCount: state.menus.length + 1,
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 250,
+                          maxCrossAxisExtent: 150,
                           mainAxisSpacing: 8,
                           crossAxisSpacing: 8,
-                          childAspectRatio: 4 / 6,
+                          childAspectRatio: 4 / 7,
                         ),
                     itemBuilder: (context, index) {
                       if (index == 0) {
-                        return Card.outlined(
+                        return Card.filled(
                           clipBehavior: Clip.hardEdge,
                           child: InkWell(
                             onTap: () {
@@ -215,67 +237,65 @@ class _MenusScreenViewState extends State<MenusScreenView> {
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    UniconsLine.plus_circle,
-                                    color: colorSheme.onPrimaryContainer,
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    "Tambah baru",
-                                    style: textTheme.headlineSmall!.copyWith(
-                                      color: colorSheme.onPrimaryContainer,
-                                    ),
-                                  ),
-                                ],
+                              child: Center(
+                                child: Icon(
+                                  UniconsLine.plus,
+                                  color: colorSheme.onPrimaryContainer,
+                                ),
                               ),
                             ),
                           ),
                         );
                       } else {
-                        return Card.filled(
-                          color: colorSheme.primaryContainer,
+                        return Card.outlined(
                           clipBehavior: Clip.hardEdge,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if (state.menus[index - 1].imageUrl == null) ...[
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Icon(
-                                    UniconsSolid.table,
-                                    color: colorSheme.onPrimaryContainer,
-                                  ),
+                          child: InkWell(
+                            onTap: () {},
+                            onLongPress: () {
+                              _showOptionsBottomSheet(
+                                context,
+                                textTheme,
+                                colorSheme,
+                                state.menus[index - 1].id!,
+                              );
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildMenuImage(
+                                  state.menus[index - 1].imageUrl,
                                 ),
-                              ] else ...[
-                                SizedBox(
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      bottomLeft: Radius.circular(12),
-                                      bottomRight: Radius.circular(12),
-                                    ),
-                                    child: Image.network(
-                                      // "$baseImgUrl${state.menus[index - 1].imageUrl}",
-                                      "",
-                                      fit: BoxFit.fill,
-                                    ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 8.0,
+                                    bottom: 8.0,
+                                    left: 8.0,
+                                    right: 8.0,
+                                  ),
+                                  child: Column(
+                                    spacing: 2,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        state.menus[index - 1].name,
+                                        style: textTheme.titleMedium!.copyWith(
+                                          color: colorSheme.onPrimaryContainer,
+                                        ),
+                                      ),
+                                      Text(
+                                        NumberFormatting.toIdr(
+                                          state.menus[index - 1].price,
+                                        ),
+                                        style: textTheme.bodySmall!.copyWith(
+                                          color: colorSheme.onPrimaryContainer,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text(
-                                  state.menus[index - 1].name,
-                                  style: textTheme.headlineSmall!.copyWith(
-                                    color: colorSheme.onPrimaryContainer,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         );
                       }
@@ -336,6 +356,187 @@ class _MenusScreenViewState extends State<MenusScreenView> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCategoryOptionsBottomSheet(
+    BuildContext context,
+    TextTheme textTheme,
+    ColorScheme colorSheme,
+    CategoryItem categoryItem,
+  ) {
+    WoltModalSheet.show(
+      useRootNavigator: true,
+      context: context,
+      pageListBuilder: (bottomSheetContext) => [
+        SliverWoltModalSheetPage(
+          hasTopBarLayer: true,
+          navBarHeight: 72.0,
+          isTopBarLayerAlwaysVisible: true,
+          topBarTitle: Text("Pilihan", style: textTheme.titleMedium),
+          mainContentSliversBuilder: (_) {
+            return [
+              SliverToBoxAdapter(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: ListTile(
+                        title: const Text("Modifikasi"),
+                        onTap: () {
+                          CategoriesSelector.onModifyCategoryPressed(
+                            context,
+                            categoryId: categoryItem.id!,
+                            categoryName: categoryItem.name,
+                            categoryDesc: categoryItem.description,
+                          );
+                        },
+                        leading: const Icon(UniconsLine.edit),
+                      ),
+                    ),
+                    Flexible(
+                      child: ListTile(
+                        title: Text(
+                          "Hapus",
+                          style: textTheme.bodyLarge!.copyWith(
+                            color: colorSheme.error,
+                          ),
+                        ),
+                        onTap: () {
+                          context.read<CategoriesBloc>().add(
+                            CategoryDeleted(categoryId: categoryItem.id!),
+                          );
+                          Navigator.of(bottomSheetContext).pop();
+                        },
+                        leading: Icon(
+                          UniconsLine.trash,
+                          color: colorSheme.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ];
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showOptionsBottomSheet(
+    BuildContext context,
+    TextTheme textTheme,
+    ColorScheme colorSheme,
+    int menuId,
+  ) {
+    WoltModalSheet.show(
+      context: context,
+      useRootNavigator: true,
+      pageListBuilder: (bottomSheetContext) => [
+        SliverWoltModalSheetPage(
+          hasTopBarLayer: true,
+          navBarHeight: 72.0,
+          isTopBarLayerAlwaysVisible: true,
+          topBarTitle: Text("Pilihan", style: textTheme.titleMedium),
+          mainContentSliversBuilder: (_) {
+            return [
+              SliverToBoxAdapter(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: ListTile(
+                        title: const Text("Modifikasi"),
+                        onTap: () {},
+                        leading: const Icon(UniconsLine.edit),
+                      ),
+                    ),
+                    Flexible(
+                      child: ListTile(
+                        title: Text(
+                          "Hapus",
+                          style: textTheme.bodyLarge!.copyWith(
+                            color: colorSheme.error,
+                          ),
+                        ),
+                        onTap: () {
+                          context.read<MenusBloc>().add(
+                            MenuDeleted(menuId: menuId),
+                          );
+                          Navigator.of(bottomSheetContext).pop();
+                        },
+                        leading: Icon(
+                          UniconsLine.trash,
+                          color: colorSheme.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ];
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuImage(String? imagePath) {
+    return SizedBox(
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+        child: _getImage(imagePath),
+      ),
+    );
+  }
+
+  Widget _getImage(String? imagePath) {
+    if (imagePath == null) {
+      return Image.asset(
+        "assets/images/Home Cooked Meal.png",
+        fit: BoxFit.fitWidth,
+      );
+    } else {
+      return Image.file(
+        File(imagePath),
+        fit: BoxFit.fitWidth,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            "assets/images/Home Cooked Meal.png",
+            fit: BoxFit.fitWidth,
+          );
+        },
+      );
+    }
+  }
+}
+
+class NumberFormatting {
+  static String _baseCurrency({
+    String? locale,
+    String? name,
+    String? symbol,
+    num? number,
+  }) {
+    final baseFormat = NumberFormat.currency(
+      locale: locale,
+      name: name,
+      symbol: symbol,
+      decimalDigits: 0,
+    );
+    return baseFormat.format(number);
+  }
+
+  static String toIdr(num number) {
+    return _baseCurrency(
+      number: number,
+      locale: 'id',
+      name: 'IDR',
+      symbol: 'Rp',
     );
   }
 }

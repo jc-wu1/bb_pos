@@ -13,8 +13,9 @@ final class MenusLoadInProgress extends MenusState {}
 
 final class MenusLoadComplete extends MenusState {
   final List<MenuItem> menus;
+  final String? categoryName;
 
-  const MenusLoadComplete({required this.menus});
+  const MenusLoadComplete({required this.menus, this.categoryName});
 
   @override
   List<Object> get props => [menus];
