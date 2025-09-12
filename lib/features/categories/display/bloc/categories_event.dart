@@ -19,3 +19,25 @@ final class CategoryInserted extends CategoriesEvent {
   @override
   List<Object> get props => [categoryItem];
 }
+
+final class CategoryDeleted extends CategoriesEvent {
+  final int categoryId;
+
+  const CategoryDeleted({required this.categoryId});
+
+  @override
+  List<Object> get props => [categoryId];
+}
+
+final class CategoryModified extends CategoriesEvent {
+  final int categoryId;
+  final CategoryItem categoryItem;
+
+  const CategoryModified({
+    required this.categoryId,
+    required this.categoryItem,
+  });
+
+  @override
+  List<Object> get props => [categoryId, categoryItem];
+}

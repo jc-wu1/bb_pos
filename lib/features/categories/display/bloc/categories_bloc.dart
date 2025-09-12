@@ -16,6 +16,8 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
       super(CategoriesInitial()) {
     on<CategoriesFetched>(_onCategoriesFetched);
     on<CategoryInserted>(_onCategoryInserted);
+    on<CategoryDeleted>(_onCategoryDeleted);
+    on<CategoryModified>(_onCategoryModified);
   }
 
   Future<void> _onCategoriesFetched(
@@ -31,8 +33,23 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     CategoryInserted event,
     Emitter<CategoriesState> emit,
   ) async {
-    emit(CategoriesLoadInProgress());
     await _usecase.insertCategory(event.categoryItem);
+    add(const CategoriesFetched());
+  }
+
+  Future<void> _onCategoryDeleted(
+    CategoryDeleted event,
+    Emitter<CategoriesState> emit,
+  ) async {
+    await _usecase.deleteCategory(event.categoryId);
+    add(const CategoriesFetched());
+  }
+
+  Future<void> _onCategoryModified(
+    CategoryModified event,
+    Emitter<CategoriesState> emit,
+  ) async {
+    await _usecase.modifyCategory(event.categoryId, event.categoryItem);
     add(const CategoriesFetched());
   }
 }

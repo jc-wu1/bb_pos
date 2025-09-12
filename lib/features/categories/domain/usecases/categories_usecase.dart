@@ -12,4 +12,10 @@ class CategoriesUsecase {
 
   Future<int> insertCategory(CategoryItem category) async =>
       await _repository.insertCategory(category);
+
+  Future<int> deleteCategory(int categoryId) async =>
+      await _repository.deleteCategory(categoryId);
+
+  Future<int> modifyCategory(int categoryId, CategoryItem category) async =>
+      await _repository.modifyCategory(categoryId, category);
 }

@@ -5,6 +5,8 @@ import '../model/category.dart';
 abstract class CategoriesLocalDataSource {
   Future<List<CategoryItem>> fetchCategories();
   Future<int> insertCategory(CategoryItem category);
+  Future<int> deleteCategory(int categoryId);
+  Future<int> modifyCategory(int categoryId, CategoryItem category);
 }
 
 class CategoriesLocalDataSourceImpl implements CategoriesLocalDataSource {
@@ -26,6 +28,27 @@ class CategoriesLocalDataSourceImpl implements CategoriesLocalDataSource {
       "tbl_categories",
       category.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return queryResult;
+  }
+
+  @override
+  Future<int> deleteCategory(int categoryId) async {
+    final queryResult = await _db.rawDelete(
+      "DELETE FROM tbl_categories WHERE id = ?",
+      [categoryId],
+    );
+    return queryResult;
+  }
+
+  @override
+  Future<int> modifyCategory(int categoryId, CategoryItem category) async {
+    final queryResult = await _db.rawUpdate(
+      '''
+        UPDATE tbl_categories SET name = ?, description = ?
+        WHERE id = ?
+      ''',
+      [category.name, category.description, categoryId],
     );
     return queryResult;
   }

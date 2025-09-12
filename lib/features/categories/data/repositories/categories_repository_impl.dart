@@ -19,4 +19,14 @@ class CategoriesRepositoryImpl implements CategoriesRepository {
   Future<int> insertCategory(CategoryItem category) {
     return _localDataSource.insertCategory(category);
   }
+
+  @override
+  Future<int> deleteCategory(int categoryId) {
+    return _localDataSource.deleteCategory(categoryId);
+  }
+
+  @override
+  Future<int> modifyCategory(int categoryId, CategoryItem category) {
+    return _localDataSource.modifyCategory(categoryId, category);
+  }
 }
