@@ -1,10 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:unicons/unicons.dart';
-
-import 'main.dart';
 
 const List<String> scopes = <String>['https://www.googleapis.com/auth/drive'];
 
@@ -26,34 +22,6 @@ class _AppScaffoldWithNavbarState extends State<AppScaffoldWithNavbar> {
         child: Row(
           children: [
             NavigationRail(
-              trailing: IconButton(
-                onPressed: () async {
-                  // Trigger the authentication flow
-                  final signIn = GoogleSignIn.instance;
-
-                  await signIn.initialize();
-                  final googleUser = await signIn.authenticate(
-                    scopeHint: scopes,
-                  );
-
-                  final GoogleSignInClientAuthorization? authorization =
-                      await googleUser.authorizationClient
-                          .authorizationForScopes(scopes);
-
-                  // Obtain the auth details from the request
-                  final googleAuth = googleUser.authentication;
-
-                  // Create a new credential
-                  final credential = GoogleAuthProvider.credential(
-                    accessToken: authorization?.accessToken,
-                    idToken: googleAuth.idToken,
-                  );
-
-                  // Once signed in, return the UserCredential
-                  await auth.signInWithCredential(credential);
-                },
-                icon: const Icon(Icons.person),
-              ),
               labelType: NavigationRailLabelType.all,
               destinations: <NavigationRailDestination>[
                 const NavigationRailDestination(
