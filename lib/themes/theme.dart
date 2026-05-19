@@ -339,12 +339,28 @@ class MaterialTheme {
     useMaterial3: true,
     brightness: colorScheme.brightness,
     colorScheme: colorScheme,
+    visualDensity: VisualDensity.compact,
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     textTheme: textTheme.apply(
       bodyColor: colorScheme.onSurface,
       displayColor: colorScheme.onSurface,
     ),
     scaffoldBackgroundColor: colorScheme.surface,
     canvasColor: colorScheme.surface,
+    elevatedButtonTheme: ElevatedButtonThemeData(style: _compactButtonStyle),
+    filledButtonTheme: FilledButtonThemeData(style: _compactButtonStyle),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: _compactButtonStyle),
+    textButtonTheme: TextButtonThemeData(style: _compactButtonStyle),
+  );
+
+  static final ButtonStyle _compactButtonStyle = ButtonStyle(
+    minimumSize: const WidgetStatePropertyAll(Size(0, 42)),
+    padding: const WidgetStatePropertyAll(
+      EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+    ),
+    shape: WidgetStatePropertyAll(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
   );
 
   List<ExtendedColor> get extendedColors => [];
