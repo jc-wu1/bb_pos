@@ -1,0 +1,9 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/ic_app_logo.jpg"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icons/ic_app_logo.jpg"
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"
