@@ -9,6 +9,7 @@ import '../features/orders/presentation/orders_page.dart';
 import '../features/payment/presentation/cash_payment_page.dart';
 import '../features/payment/presentation/qris_payment_page.dart';
 import '../features/report/presentation/report_page.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import 'app_scaffold.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -63,35 +64,9 @@ final GoRouter appRouter = GoRouter(
         ),
         GoRoute(
           path: "/settings",
-          builder: (context, state) =>
-              const _MenuPage(title: "Settings", icon: Icons.settings_outlined),
+          builder: (context, state) => const SettingsScreen(),
         ),
       ],
     ),
   ],
 );
-
-class _MenuPage extends StatelessWidget {
-  const _MenuPage({required this.title, required this.icon});
-
-  final String title;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 40, color: theme.colorScheme.primary),
-            const SizedBox(height: 12),
-            Text(title, style: theme.textTheme.headlineMedium),
-          ],
-        ),
-      ),
-    );
-  }
-}
