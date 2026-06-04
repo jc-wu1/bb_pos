@@ -92,6 +92,15 @@ void main() {
     cubit.selectCategory(null);
     expect(cubit.state.visibleItems.map((item) => item.id), [1]);
   });
+
+  test('accepts a formatted positive price', () {
+    final repository = _FakeMenuRepository();
+    final cubit = buildCubit(repository);
+    addTearDown(cubit.close);
+    addTearDown(repository.close);
+
+    expect(cubit.validatePrice('30.000'), isNull);
+  });
 }
 
 class _FakeMenuRepository implements MenuRepository {

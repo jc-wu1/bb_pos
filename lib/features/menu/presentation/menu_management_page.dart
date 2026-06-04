@@ -21,6 +21,7 @@ final NumberFormat _currencyFormatter = NumberFormat.currency(
   symbol: 'Rp ',
   decimalDigits: 0,
 );
+final NumberFormat _priceFormatter = NumberFormat.decimalPattern('id_ID');
 
 class MenuManagementPage extends StatelessWidget {
   const MenuManagementPage({super.key});
@@ -731,7 +732,7 @@ class _MenuFormSheetState extends State<_MenuFormSheet> {
 
     final item = widget.item;
     _nameController.text = item?.name ?? '';
-    _priceController.text = item == null ? '' : item.price.toString();
+    _priceController.text = item == null ? '' : _formatPrice(item.price);
     _descriptionController.text = item?.description ?? '';
     _category = item?.category;
   }
@@ -767,7 +768,7 @@ class _MenuFormSheetState extends State<_MenuFormSheet> {
         id: widget.item?.id,
         categoryId: _category!.id,
         name: _nameController.text.trim(),
-        price: int.parse(_priceController.text),
+        price: int.parse(_digitsOnly(_priceController.text)),
         description: _descriptionController.text.trim(),
         imagePath: widget.item?.imagePath,
         pickedImagePath: _pickedImagePath,
@@ -984,7 +985,7 @@ class _MenuFormSheetState extends State<_MenuFormSheet> {
                                 keyboardType: TextInputType.number,
                                 textInputAction: TextInputAction.next,
                                 inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
+                                  _ThousandsSeparatorInputFormatter(),
                                 ],
                                 decoration: appFieldDecoration(
                                   context,
@@ -1217,4 +1218,61 @@ bool _isSameCategory(MenuCategoryEntity? first, MenuCategoryEntity? second) {
 
 String _formatCurrency(int value) {
   return _currencyFormatter.format(value);
+}
+
+String _formatPrice(int value) {
+  return _priceFormatter.format(value);
+}
+
+String _digitsOnly(String value) {
+  return value.replaceAll(RegExp(r'\D'), '');
+}
+
+class _ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = _digitsOnly(newValue.text);
+    if (digits.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    final price = int.tryParse(digits);
+    if (price == null) return oldValue;
+
+    final formatted = _formatPrice(price);
+    final digitsBeforeCursor = _digitsOnly(_textBeforeCursor(newValue)).length;
+    final cursorOffset = _offsetAfterDigits(formatted, digitsBeforeCursor);
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: cursorOffset),
+    );
+  }
+
+  String _textBeforeCursor(TextEditingValue value) {
+    final selectionEnd = value.selection.end;
+    if (selectionEnd < 0) return value.text;
+    if (selectionEnd > value.text.length) return value.text;
+    return value.text.substring(0, selectionEnd);
+  }
+
+  int _offsetAfterDigits(String text, int digitCount) {
+    if (digitCount <= 0) return 0;
+
+    var seenDigits = 0;
+    for (var index = 0; index < text.length; index += 1) {
+      if (RegExp(r'\d').hasMatch(text[index])) {
+        seenDigits += 1;
+        if (seenDigits == digitCount) return index + 1;
+      }
+    }
+
+    return text.length;
+  }
 }
