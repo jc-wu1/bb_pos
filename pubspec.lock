@@ -358,6 +358,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+  flutter_notification_listener:
+    dependency: "direct main"
+    description:
+      name: flutter_notification_listener
+      sha256: da24858c65ab02f6cddad88c06ae45885c514e131f5a6c47c471e7260d3bca51
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

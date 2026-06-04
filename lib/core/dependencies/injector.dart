@@ -1,5 +1,10 @@
 import 'package:get_it/get_it.dart';
 
+import '../../features/dashboard/data/data_sources/dashboard_local_data_source.dart';
+import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
+import '../../features/dashboard/domain/usecase/watch_dashboard.dart';
+import '../../features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import '../../features/menu/data/data_sources/menu_image_local_data_source.dart';
 import '../../features/menu/data/data_sources/menu_local_data_source.dart';
 import '../../features/menu/data/repositories/menu_repository_impl.dart';
@@ -12,14 +17,18 @@ import '../../features/menu/domain/usecase/watch_menu_items.dart';
 import '../../features/menu/presentation/cubit/menu_management_cubit.dart';
 import '../../features/orders/data/data_sources/orders_local_data_source.dart';
 import '../../features/orders/data/repositories/orders_repository_impl.dart';
+import '../../features/orders/domain/entities/order_entity.dart';
 import '../../features/orders/domain/repositories/orders_repository.dart';
 import '../../features/orders/domain/usecase/cancel_order.dart';
 import '../../features/orders/domain/usecase/change_order_item_quantity.dart';
+import '../../features/orders/domain/usecase/confirm_order_payment.dart';
 import '../../features/orders/domain/usecase/create_order.dart';
 import '../../features/orders/domain/usecase/set_order_item_quantity.dart';
 import '../../features/orders/domain/usecase/watch_order_menu_items.dart';
 import '../../features/orders/domain/usecase/watch_orders.dart';
 import '../../features/orders/presentation/cubit/orders_cubit.dart';
+import '../../features/payment/presentation/cubit/cash_payment_cubit.dart';
+import '../../features/payment/presentation/cubit/qris_payment_cubit.dart';
 import '../database/database.dart';
 
 final getIt = GetIt.instance;
@@ -28,6 +37,19 @@ void setupDependencies() {
   getIt.registerLazySingleton<AppDatabase>(
     AppDatabase.new,
     dispose: (database) => database.close(),
+  );
+  getIt.registerLazySingleton<DashboardLocalDataSource>(
+    () => DriftDashboardLocalDataSource(getIt<AppDatabase>()),
+  );
+  getIt.registerLazySingleton<DashboardRepository>(
+    () =>
+        DashboardRepositoryImpl(dataSource: getIt<DashboardLocalDataSource>()),
+  );
+  getIt.registerLazySingleton(
+    () => WatchDashboard(getIt<DashboardRepository>()),
+  );
+  getIt.registerFactory(
+    () => DashboardCubit(watchDashboard: getIt<WatchDashboard>()),
   );
   getIt.registerLazySingleton<MenuLocalDataSource>(
     () => DriftMenuLocalDataSource(getIt<AppDatabase>()),
@@ -77,6 +99,21 @@ void setupDependencies() {
     () => SetOrderItemQuantity(getIt<OrdersRepository>()),
   );
   getIt.registerLazySingleton(() => CancelOrder(getIt<OrdersRepository>()));
+  getIt.registerLazySingleton(
+    () => ConfirmOrderPayment(getIt<OrdersRepository>()),
+  );
+  getIt.registerFactoryParam<CashPaymentCubit, OrderEntity?, void>(
+    (order, _) => CashPaymentCubit(
+      confirmOrderPayment: getIt<ConfirmOrderPayment>(),
+      order: order,
+    ),
+  );
+  getIt.registerFactoryParam<QrisPaymentCubit, OrderEntity?, void>(
+    (order, _) => QrisPaymentCubit(
+      confirmOrderPayment: getIt<ConfirmOrderPayment>(),
+      order: order,
+    ),
+  );
   getIt.registerFactory(
     () => OrdersCubit(
       watchOrders: getIt<WatchOrders>(),
