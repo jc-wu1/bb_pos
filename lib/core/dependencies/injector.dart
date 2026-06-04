@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 
+import '../../features/bluetooth/data/bluetooth_printer_service.dart';
+import '../../features/bluetooth/presentation/bloc/bluetooth_bloc.dart';
 import '../../features/dashboard/data/data_sources/dashboard_local_data_source.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
 import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
@@ -122,6 +124,12 @@ void setupDependencies() {
       changeOrderItemQuantity: getIt<ChangeOrderItemQuantity>(),
       setOrderItemQuantity: getIt<SetOrderItemQuantity>(),
       cancelOrder: getIt<CancelOrder>(),
+    ),
+  );
+  getIt.registerLazySingleton(BluetoothPrinterService.new);
+  getIt.registerFactory(
+    () => BluetoothBloc(
+      bluetoothPrinterService: getIt<BluetoothPrinterService>(),
     ),
   );
 }
