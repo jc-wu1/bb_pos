@@ -115,8 +115,9 @@ class MenuManagementCubit extends Cubit<MenuManagementState> {
   }
 
   String? validatePrice(String? value) {
-    final price = int.tryParse(value ?? '');
-    if (value == null || value.isEmpty) {
+    final normalizedPrice = _digitsOnly(value ?? '');
+    final price = int.tryParse(normalizedPrice);
+    if (normalizedPrice.isEmpty) {
       return 'Harga tidak boleh kosong.';
     }
 
@@ -291,4 +292,8 @@ class MenuManagementCubit extends Cubit<MenuManagementState> {
     await _itemsSubscription?.cancel();
     return super.close();
   }
+}
+
+String _digitsOnly(String value) {
+  return value.replaceAll(RegExp(r'\D'), '');
 }
