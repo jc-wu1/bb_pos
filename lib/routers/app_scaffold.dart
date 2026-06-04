@@ -34,12 +34,12 @@ class _AppScaffoldState extends State<AppScaffold> {
       selectedIcon: Icons.restaurant_menu,
       path: '/menu',
     ),
-    // _NavigationItem(
-    //   label: 'Report',
-    //   icon: Icons.bar_chart_outlined,
-    //   selectedIcon: Icons.bar_chart,
-    //   path: '/report',
-    // ),
+    _NavigationItem(
+      label: 'Report',
+      icon: Icons.bar_chart_outlined,
+      selectedIcon: Icons.bar_chart,
+      path: '/report',
+    ),
     _NavigationItem(
       label: 'Settings',
       icon: Icons.settings_outlined,
